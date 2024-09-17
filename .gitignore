@@ -1,0 +1,12 @@
+# Ambiente Virtual
+venv/
+
+# Arquivo de Configuração de Ambiente
+.env
+
+# Logs
+relatorios/app.log
+
+# Arquivos de Compilação
+*.pyc
+__pycache__/

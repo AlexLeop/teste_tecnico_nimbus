@@ -1,0 +1,25 @@
+{
+    "análise": [
+        {
+            "fenomeno": "chuva",
+            "data": "2023-12-30T12:00",
+            "mensagem": "Registro de chuva moderada ao longo do dia inteiro, com períodos de intensificação em algumas áreas. A chuva começou nas primeiras horas da manhã e se estendeu até a noite, resultando em acumulações significativas. Essa condição pode causar transtornos no trânsito e em áreas vulneráveis a alagamentos."
+        },
+        {
+            "fenomeno": "deslizamento",
+            "data": "2023-12-30T09:00",
+            "mensagem": "Deslizamento de terra durante a chuva devido ao encharcamento do solo, que já estava saturado pelas chuvas dos dias anteriores. Esse deslizamento causou bloqueios em estradas locais e danos em algumas propriedades próximas. As autoridades foram acionadas para realizar os devidos reparos e garantir a segurança dos moradores."
+        },
+        {
+            "data": "2023-12-25T15:00",
+            "mensagem": "A operação externa foi interrompida durante 3 horas devido à ocorrência de raios. Durante este período, a atividade elétrica foi intensa, representando um risco significativo para as atividades ao ar livre. Todos os funcionários foram instruídos a se abrigarem em locais seguros até que a tempestade passasse e fosse considerado seguro retomar as operações."
+        }
+    ],
+    "previsao": [
+        {
+            "fenomeno": "chuva",
+            "data": "2024-01-01T12:00",
+            "mensagem": "No início da tarde haverá chuva forte entre 12h e 13h, com possibilidade de trovoadas. A previsão indica que a intensidade da chuva será suficiente para causar alagamentos temporários em áreas baixas. As atividades a céu aberto não são indicadas durante esse período devido ao risco de raios e inundações rápidas."
+        }
+    ]
+}
