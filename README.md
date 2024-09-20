@@ -40,7 +40,7 @@ requirements.txt
 - **relatorios/**: Contém o código para a aplicação de geração de relatórios meteorológicos.
   - **app.log**: Arquivo de logs que registra os eventos da geração de relatórios.
   - **dados.txt**: Armazena as informações recebidas dos clientes (nome, email, telefone, idade).
-  - **previsoes.txt**: Arquivo de previsões meteorológicas usadas na geração do relatório.
+  - **bruto.txt**: Arquivo de previsões meteorológicas usadas na geração do relatório.
   - **relatorios.py**: Script para gerar o relatório meteorológico em PDF e, opcionalmente, enviar por e-mail.
 
 - **venv/**: Ambiente virtual para a instalação dos pacotes Python necessários.
