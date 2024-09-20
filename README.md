@@ -19,9 +19,12 @@ Script/
         server.py
     relatorios/
         __init__.py
+        tests/
+            test_relatorio.py
+        tmp/
+            bruto.txt
         app.log
         dados.txt
-        previsoes.txt
         relatorios.py
 venv/
 .env
