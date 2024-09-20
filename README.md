@@ -82,7 +82,12 @@ Esta aplicação atua como um serviço contínuo de recepção de dados via prot
 
    O servidor começará a escutar a porta 5784 e estará pronto para receber dados.
 
-3. **Executar o Cliente:**
+   Para parar o servidor TCP/IP, digite o comando:
+   ```bash
+   parar
+   ```
+
+4. **Executar o Cliente:**
 
    Para simular o envio de dados, execute o script `client.py` passando os dados como argumento:
 
@@ -92,7 +97,7 @@ Esta aplicação atua como um serviço contínuo de recepção de dados via prot
 
    O cliente enviará os dados para o servidor, e o servidor responderá com "Ok" caso os dados estejam no formato correto. Se houver erro, o cliente receberá uma mensagem de erro.
 
-4. **Logs:**
+5. **Logs:**
 
    Todas as operações do servidor serão registradas no arquivo `app.log` dentro do diretório `relatorios/`.
 
@@ -150,9 +155,18 @@ Este script gera relatórios meteorológicos em formato PDF com base em um arqui
    O projeto contém testes unitários básicos para validar as funções do cliente e do servidor. Os testes estão localizados no diretório `tests/` dentro da pasta `conexao`.
 
    Para rodar os testes, execute:
-
+   
+   Para rodar os teste de conexão TCP/IP SERVIDOR X CLIENTE:
    ```bash
    python -m unittest discover -s conexao/tests
+   ```
+   Para rodar os teste de geração de relatório e envio de E-mail:
+   ```bash
+   python -m unittest discover -s relatorio/tests
+   ```
+   Para rodar todos os testes execute este comando no diretório raiz do Projeto:
+   ```bash
+   pytest
    ```
 
 ---
