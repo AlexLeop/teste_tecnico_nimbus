@@ -26,7 +26,6 @@ Script/
         app.log
         dados.txt
         relatorios.py
-venv/
 .env
 requirements.txt
 ```
