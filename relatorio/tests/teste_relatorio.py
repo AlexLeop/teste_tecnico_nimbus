@@ -1,5 +1,5 @@
+""" Teste de relatório """
 import pytest
-import os
 from relatorio.relatorios import RelatorioMeteorologico
 
 

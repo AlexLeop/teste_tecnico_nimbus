@@ -53,9 +53,72 @@ class RelatorioMeteorologico:
             logging.info("Arquivo bruto carregado com sucesso.")
             return conteudo
         except FileNotFoundError:
-            logging.error(f"Arquivo bruto {self.caminho_bruto} não encontrado.")
+            logging.error("Arquivo bruto {} não encontrado.".format(self.caminho_bruto))
             raise
 
+    # Métodos de estilização
+    def set_fonte_negrito(self, pdf, tamanho=12):
+        """
+        Define a fonte para negrito com o tamanho especificado.
+
+        Parâmetros:
+        pdf (FPDF): Instância do FPDF para estilização.
+        tamanho (int): Tamanho da fonte. Default é 12.
+        """
+        pdf.set_font('Arial', 'B', tamanho)
+
+    def set_fonte_normal(self, pdf, tamanho=12):
+        """
+        Define a fonte para o texto normal com o tamanho especificado.
+
+        Parâmetros:
+        pdf (FPDF): Instância do FPDF para estilização.
+        tamanho (int): Tamanho da fonte. Default é 12.
+        """
+        pdf.set_font('Arial', '', tamanho)
+
+    def set_cor_fundo_vermelho(self, pdf):
+        """
+        Define o fundo vermelho para elementos de destaque.
+        """
+        pdf.set_fill_color(255, 0, 0)  # Vermelho
+
+    def set_cor_fundo_cinza(self, pdf):
+        """
+        Define o fundo cinza escuro para elementos comuns.
+        """
+        pdf.set_fill_color(85, 85, 85)  # Cinza escuro
+
+    def set_cor_texto_branco(self, pdf):
+        """
+        Define o texto branco.
+        """
+        pdf.set_text_color(255, 255, 255)  # Branco
+
+    def set_cor_texto_preto(self, pdf):
+        """
+        Define o texto preto.
+        """
+        pdf.set_text_color(0, 0, 0)  # Preto
+
+    def set_alinhamento_direita(self, pdf):
+        """
+        Define o alinhamento do texto à direita.
+        """
+        pdf.cell(200, 10, ln=True, align='R')
+
+    def carregar_dados_clientes(self):
+        """
+        Carrega as informações do cliente salvas localmente no arquivo 'clientes.txt'.
+
+        :return:
+        - list: Lista com os dados do cliente.
+        """
+        with open('clientes.txt', 'r', encoding='utf-8') as f:
+            clientes = [linha.strip().split(',') for linha in f.readlines()]
+            return clientes
+
+    # Funções principais de geração de relatório
     def gerar_relatorio_pdf(self):
         """
         Gera o relatório meteorológico em PDF, separando análises e previsões.
@@ -67,25 +130,29 @@ class RelatorioMeteorologico:
         Retorna:
         str: Caminho do PDF gerado.
         """
-        cliente_nome = "Cliente XYZ"
-        pdf = FPDF()
-        pdf.set_auto_page_break(auto=True, margin=15)
+        clientes = self.carregar_dados_clientes()
+        for cliente in clientes:
+            nome_cliente = cliente[0]
+            email_cliente = cliente[1]
 
-        # Adiciona a primeira página e a seção de Análise
-        pdf.add_page()
-        self._adicionar_cabecalho(pdf, cliente_nome, )
-        self._adicionar_secao_analise(pdf, "Análise")
+            pdf = FPDF()
+            pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Adiciona uma nova página e a seção de Previsão
-        pdf.add_page()
-        self._adicionar_cabecalho(pdf, cliente_nome, )
-        self._adicionar_secao_previsao(pdf, "Previsão")
+            # Adiciona a primeira página e a seção de Análise
+            pdf.add_page()
+            self._adicionar_cabecalho(pdf, nome_cliente)
+            self._adicionar_secao_analise(pdf, "Análise")
 
-        # Salva o PDF
-        caminho_pdf = f"relatorio_{cliente_nome}.pdf"
-        pdf.output(caminho_pdf)
-        logging.info(f"Relatório PDF gerado: {caminho_pdf}")
-        return caminho_pdf
+            # Adiciona uma nova página e a seção de Previsão
+            pdf.add_page()
+            self._adicionar_cabecalho(pdf, nome_cliente)
+            self._adicionar_secao_previsao(pdf, "Previsão")
+
+            # Salva o PDF
+            caminho_pdf = "relatorio_{}.pdf".format(nome_cliente)
+            pdf.output(caminho_pdf)
+            logging.info("Relatório PDF gerado: {}".format(caminho_pdf))
+            return caminho_pdf
 
     def _adicionar_cabecalho(self, pdf, cliente_nome):
         """
@@ -97,17 +164,17 @@ class RelatorioMeteorologico:
         """
         # Adicionar a faixa azul marinho
         pdf.set_y(0)  # Começar no topo da página
-        pdf.set_fill_color(18, 10, 143)  # Azul marinho
-        pdf.rect(0, 0, pdf.w, 10, 'F')  # Desenhar o retângulo azul marinho
+        pdf.set_fill_color(5, 55, 95)  # Azul marinho
+        pdf.rect(0, 0, pdf.w, 15, 'F')  # Desenhar o retângulo azul marinho
 
         # Adicionar o título centralizado
-        pdf.set_font('Arial', 'B', 16)
+        pdf.set_font('Arial', 'B', 19)
         pdf.set_text_color(255, 255, 255)  # Branco para o texto
-        pdf.cell(0, 10, 'Relatório Meteorológico', ln=True, align='C')
+        pdf.cell(0, 15, 'Relatório Meteorológico', ln=True, align='C')
 
         # Adicionar a faixa amarela
-        pdf.set_fill_color(255, 255, 0)
-        pdf.rect(0, 10, pdf.w, 2, 'F')  # Desenhar o retângulo amarelo
+        pdf.set_fill_color(255, 170, 60)
+        pdf.rect(0, 15, pdf.w, 2, 'F')  # Desenhar o retângulo amarelo
 
         # Adicionar o cliente e a data de confecção na mesma linha
         pdf.set_y(12)  # Ajustar a posição Y para o conteúdo
@@ -118,133 +185,151 @@ class RelatorioMeteorologico:
         largura_pagina = pdf.w - 2 * pdf.l_margin
 
         # Calcular a largura das células
-        largura_cliente = pdf.get_string_width(f'Cliente: {cliente_nome}')
-        largura_data = pdf.get_string_width(f'Data de Confecção: {datetime.strftime(self.data, "%d-%m-%Y %H:%M")}')
+        largura_cliente = pdf.get_string_width('Cliente: {}'.format(cliente_nome))
+        largura_data = pdf.get_string_width(
+            'Data de Confecção: {}'.format(datetime.strftime(self.data, "%d/%m/%Y %H:%M")))
 
         # Adicionar a célula do cliente alinhada à esquerda
-        pdf.cell(largura_cliente, 10, f'Cliente: {cliente_nome}', ln=False, align='L')
+        pdf.set_font('Arial', 'B', 14)
+        pdf.cell(largura_cliente, 17, 'Cliente:', ln=False, align='L')
+        pdf.set_font('Arial', '', 14)
+        pdf.cell(largura_cliente, 17, '{}'.format(cliente_nome.capitalize()), ln=False, align='L')
 
         # Adicionar a célula da data alinhada à direita
-        pdf.set_x(largura_pagina - largura_data)
-        pdf.cell(largura_data, 10, f'Data de Confecção: {datetime.strftime(self.data, "%d-%m-%Y %H:%M")}', ln=True,
-                 align='R')
+        pdf.set_x(largura_pagina - (largura_data + 20))
 
-        pdf.ln(4)  # Espaçamento após o cabeçalho
+        pdf.set_font('Arial', 'B', 14)
+        pdf.cell(largura_data, 17, 'Data de Confecção:', ln=False, align='R')
+
+        pdf.set_font('Arial', '', 14)
+        pdf.cell(0, 17, ' {}'.format(datetime.strftime(self.data, "%d/%m/%Y")), ln=True, align='R')
+
+        pdf.ln(10)  # Espaçamento após o cabeçalho
 
     def _adicionar_secao_analise(self, pdf, tipo_conteudo):
-        """
-        Adiciona a seção de análises ao PDF.
-
-        A seção de análise contém eventos observados e registrados anteriormente.
-        Cada análise inclui o fenômeno, a data e uma mensagem descritiva.
-
-        Parâmetros:
-        pdf (FPDF): Objeto FPDF para manipulação do PDF.
-        tipo_conteudo (str): Tipo de conteúdo ("Análise" ou "Previsão").
-        """
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, f'{tipo_conteudo}', ln=True)
+        pdf.set_font('Arial', 'B', 16)
+        pdf.cell(200, 10, '{}'.format(tipo_conteudo), ln=True)
 
         for item in self.conteudo_bruto['análise']:
-            pdf.ln(10)
-
+            pdf.ln(2)
             fenomeno = item.get('fenomeno', 'Não especificado')
+            mensagem = item.get('mensagem', 'Mensagem não disponível')
 
-            # Configurar o fundo colorido para o fenômeno
-            if any(palavra in fenomeno.lower() for palavra in ['inundação']):
-                pdf.set_font('Arial', 'B', 12)
-                pdf.set_text_color(255, 255, 255)  # Branco para o texto
-                pdf.set_fill_color(255, 0, 0)  # Cor vermelha para o fundo
-                pdf.cell(80, 10, fenomeno, ln=True, fill=True)
-                pdf.ln(2)  # Espaçamento após o fundo colorido
-
+            # Verifica e aplica fundo vermelho se a mensagem contiver a palavra "forte"
+            if "forte" in mensagem.lower():
+                self.set_fonte_negrito(pdf)
+                self.set_cor_texto_branco(pdf)
+                self.set_cor_fundo_vermelho(pdf)
             else:
-                pdf.set_font('Arial', 'B', 12)
-                pdf.set_text_color(255, 255, 255)  # Branco para o texto
-                pdf.set_fill_color(46, 46, 46)  # Cinza escuro para o fundo
-                pdf.cell(80, 10, fenomeno, ln=True, fill=True)
-                pdf.ln(2)  # Espaçamento após o fundo colorido
+                self.set_fonte_negrito(pdf)
+                self.set_cor_texto_branco(pdf)
+                self.set_cor_fundo_cinza(pdf)
 
-            # Formatação da data
-            data_formatada_analise = (
-                datetime.strptime(item.get('data', '1970-01-01T00:00'), '%Y-%m-%dT%H:%M').strftime('%d/%m/%Y as %H:%M')
-            )
+            pdf.cell(80, 8, fenomeno.capitalize(), ln=True, fill=True)
+            pdf.ln(2)
 
-            pdf.set_font('Arial', 'B', 12)  # Data em negrito
-            pdf.set_text_color(0, 0, 0)  # Preto para o texto
-            pdf.multi_cell(0, 10, f"{data_formatada_analise} ", align='L')  # Adicionar data
+            # Adicionar data e mensagem
+            data_formatada_analise = datetime.strptime(item.get('data', '1970-01-01T00:00'), '%Y-%m-%dT%H:%M').strftime(
+                '%d/%m/%Y as %H:%M ')
+            largura_data = pdf.get_string_width(data_formatada_analise)
 
-            pdf.set_font('Arial', '', 12)  # Mensagem normal
-            pdf.multi_cell(0, 10, item.get('mensagem', 'Mensagem não disponível'), align='L')  # Adicionar mensagem
+            self.set_fonte_negrito(pdf)  # Data em negrito
+            self.set_cor_texto_preto(pdf)  # Texto preto
+            pdf.cell(largura_data, 5, "{} ".format(data_formatada_analise), align='J', ln=False)
 
-            pdf.ln(5)  # Espaçamento após a mensagem
+            self.set_fonte_normal(pdf)  # Mensagem normal
+
+            # Exibe a mensagem na mesma linha ou com quebras
+            largura_restante = pdf.w - 2.7 * (pdf.l_margin + largura_data)
+            primeira_linha = pdf.get_string_width(mensagem)
+
+            if primeira_linha < largura_restante:
+                pdf.cell(0, 5, mensagem)
+            else:
+                parte_inicial = mensagem[:int(largura_restante)]
+                pdf.cell(largura_restante, 5, parte_inicial, ln=True, align='J')
+                restante_mensagem = mensagem[int(largura_restante):]
+                pdf.multi_cell(0, 5, restante_mensagem)
+
+            pdf.ln(5)
 
     def _adicionar_secao_previsao(self, pdf, tipo_conteudo):
         """
         Adiciona a seção de previsões ao PDF, agrupando previsões por fenômeno.
 
-        A seção de previsão contém eventos meteorológicos esperados. Eventos críticos
-        com a palavra "forte" são destacados em vermelho para chamar a atenção.
+        A seção de previsão contém eventos meteorológicos esperados, e as previsões
+        de fenômenos iguais (como chuva) são agrupadas por data e mensagem.
 
         Parâmetros:
         pdf (FPDF): Objeto FPDF para manipulação do PDF.
         """
 
-        # pdf.add_page()  # Adiciona a primeira página para a seção de previsões
-        pdf.set_font('Arial', 'B', 16)
-        pdf.cell(200, 10, f'{tipo_conteudo}', ln=True, align='L')
-        pdf.ln(2)  # Adiciona um espaço após o título
+        self.set_fonte_negrito(pdf, 16)
+        pdf.cell(200, 10, '{}'.format(tipo_conteudo), ln=True, align='L')
 
-        previsoes_agrupadas = self._agrupar_previsoes()
+        previsoes_agrupadas = self._agrupar_previsoes_por_fenomeno()
 
-        for data, eventos in previsoes_agrupadas.items():
-            # Formatação da data
-            data_formatada = datetime.strptime(data, '%Y-%m-%dT%H:%M').strftime('%d/%m/%Y as %H:%M')
+        for fenomeno, previsoes in previsoes_agrupadas.items():
+            # Configura a cor e o estilo de acordo com o conteúdo
+            self.set_fonte_negrito(pdf, 12)
+            self.set_cor_texto_branco(pdf)
 
-            for evento in eventos:
-                # Adiciona título da previsão (data) se necessário
-                pdf.set_font('Arial', 'B', 12)
-                pdf.set_text_color(0, 0, 0)  # Preto para o texto
-                pdf.ln(5)
+            # Exibir o fenômeno (com fundo vermelho se "forte" estiver em qualquer mensagem)
+            if any("forte" in previsao['mensagem'].lower() for previsao in previsoes):
+                self.set_cor_fundo_vermelho(pdf)
+            else:
+                self.set_cor_fundo_cinza(pdf)
 
-                # Configuração de cor para o fenômeno
-                if any(palavra in evento['fenomeno'].lower() for palavra in ['eventos', 'chuva', 'vento']):
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.set_text_color(255, 255, 255)  # Branco para o texto
-                    pdf.set_fill_color(255, 0, 0)  # Cor vermelha para o fundo
-                    pdf.cell(80, 10, f"{evento['fenomeno']}", ln=True, fill=True)
-                    pdf.set_text_color(0, 0, 0)  # Preto para o texto
-                    pdf.multi_cell(200, 10, f"{data_formatada}")
+            pdf.cell(80, 8, "{}".format(fenomeno.capitalize()), ln=True, fill=True)
+            pdf.ln(2)
+
+            # Agrupa as previsões por data e mensagem
+            for previsao in previsoes:
+                data_formatada = datetime.strptime(previsao['data'], '%Y-%m-%dT%H:%M').strftime('%d/%m/%Y as %H:%M ')
+                mensagem = previsao['mensagem']
+
+                # Exibe a data em negrito
+                largura_data = pdf.get_string_width(data_formatada)
+                self.set_fonte_negrito(pdf)
+                self.set_cor_texto_preto(pdf)
+                pdf.cell(largura_data, 5, "{} ".format(data_formatada), ln=False)
+
+                # Exibe a mensagem com quebra automática
+                self.set_fonte_normal(pdf)
+                largura_restante = pdf.w - 2.7 * (pdf.l_margin + largura_data)
+                primeira_linha = pdf.get_string_width(mensagem)
+
+                if primeira_linha < largura_restante:
+                    pdf.cell(0, 5, mensagem)
+                    pdf.ln(5)
                 else:
-                    pdf.set_font('Arial', 'B', 12)
-                    pdf.set_fill_color(46, 46, 46)  # Cinza para o marca-texto
-                    pdf.set_text_color(255, 255, 255)  # Branco para o texto
-                    pdf.cell(80, 8, f"{evento['fenomeno']}", ln=True, fill=True)
-                    pdf.set_text_color(0, 0, 0)  # Preto para o texto
-                    pdf.multi_cell(200, 10, f"{data_formatada}")
+                    parte_inicial = mensagem[:int(largura_restante)]
+                    pdf.cell(largura_restante, 5, parte_inicial, ln=True, align='J')
+                    restante_mensagem = mensagem[int(largura_restante):]
+                    pdf.multi_cell(0, 5, restante_mensagem)
+                    pdf.ln(5)
+            pdf.ln(5)
 
-                pdf.set_text_color(0, 0, 0)  # Preto para o texto
-                pdf.set_font('Arial', '', 12)
-                mensagem = evento['mensagem']
-                pdf.multi_cell(0, 10, f"{mensagem}", align='L')
-                pdf.ln(5)
-
-        # Adiciona uma nova página após adicionar todas as previsões, se necessário
-        # pdf.add_page()  # Descomente se desejar adicionar uma nova página após todas as previsões
-
-    def _agrupar_previsoes(self):
+    def _agrupar_previsoes_por_fenomeno(self):
         """
-        Agrupa previsões por data e fenômeno.
+        Agrupa previsões por fenômeno, combinando datas e mensagens.
 
-        Retorna:
-        dict: Dicionário com previsões agrupadas por data.
+        :return:
+        - dict: Dicionário com o fenômeno como chave e as previsões (data e mensagem) como valor.
         """
         previsoes_agrupadas = {}
-        for item in self.conteudo_bruto['previsao']:
-            data = item['data']
-            if data not in previsoes_agrupadas:
-                previsoes_agrupadas[data] = []
-            previsoes_agrupadas[data].append(item)
+
+        for previsao in self.conteudo_bruto['previsao']:
+            fenomeno = previsao['fenomeno']
+
+            if fenomeno not in previsoes_agrupadas:
+                previsoes_agrupadas[fenomeno] = []
+
+            previsoes_agrupadas[fenomeno].append({
+                'data': previsao['data'],
+                'mensagem': previsao['mensagem']
+            })
+
         return previsoes_agrupadas
 
     def enviar_email_com_anexo(self, destinatarios, caminho_pdf):
@@ -285,8 +370,9 @@ class RelatorioMeteorologico:
 
             logging.info("Relatório enviado para: {}".format(', '.join(destinatarios)))
         except Exception as e:
-            logging.error("Erro ao enviar e-mail: {}".format(e))
+            logging.error("Erro ao enviar e-mail para {}: {}".format(', '.join(destinatarios), e))
             raise
+
 
 def main():
     # Argumentos de linha de comando

@@ -37,8 +37,18 @@ class TCPClient:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((self.host, self.port))  # Conecta ao servidor
             s.sendall(data.encode('utf-8'))  # Envia os dados codificados
-            response = s.recv(1024)  # Recebe a resposta do servidor
-            print('Resposta do servidor: {}'.format(response))  # Exibe a resposta
+            response = s.recv(1024).decode('utf-8')  # Recebe a resposta do servidor
+            print('{}'.format(response))  # Exibe a resposta
+
+    def stop_client(self):
+        """
+        Comentários
+        :return:
+        """
+        command = input()
+        if command.lower() == 'parar':
+            print('Encerrando conexão')
+            self.client_socket.close()
 
 
 # Inicializando o cliente
@@ -47,5 +57,6 @@ if __name__ == "__main__":
     client = TCPClient()
 
     # Exemplo de dados válidos a serem enviados
-    dados = "joao,joao@nimbusmeteorologia.com.br,01234567891,30"
+    # dados = "joao,joao@nimbusmeteorologia.com.br,01234567891,30"
+    dados = "joao,joao@nimbusmeteorologia.com.br,01234567891"
     client.send_data(dados)

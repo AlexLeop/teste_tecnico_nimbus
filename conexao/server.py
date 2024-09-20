@@ -1,8 +1,10 @@
 """ Servidor """
 import os
+import dotenv
 import socket
 import threading
-import signal
+
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 class TCPServer:
@@ -12,7 +14,8 @@ class TCPServer:
     o formato esperado.
     """
 
-    def __init__(self, host: str = None, port: int = None, works: int = None, message_limit: int = None):
+    def __init__(self, host: str = None, port: int = None,
+                 works: int = None, message_limit: int = None, close: str = None):
         """
         Inicializa o servidor TCP.
 
@@ -23,10 +26,11 @@ class TCPServer:
         - message_limit (int): Tamanho máximo dos dados recebidos. Default: 1024.
         """
         # Obter valores de ambiente ou usar valores padrão
-        self.host = host or os.getenv('HOST', '127.0.0.1')
-        self.port = int(port or os.getenv('PORT', 5784))
-        self.works = int(works or os.getenv('WORKS', 5))
-        self.max_limit_message = int(message_limit or os.getenv('MAX_LIMIT_MESSAGE', 1024))
+        self.host = host or os.getenv('HOST')
+        self.port = int(port or os.getenv('PORT'))
+        self.works = int(works or os.getenv('WORKS'))
+        self.max_limit_message = int(message_limit or os.getenv('MAX_LIMIT_MESSAGE'))
+        self.close = close
 
         # Inicializa o socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,10 +45,11 @@ class TCPServer:
         self.server_socket.bind((self.host, self.port))  # Vincula o socket ao endereço e porta
         self.server_socket.listen(self.works)  # Define o limite de 5 conexões simultâneas na fila de espera
         print('Servidor iniciado na porta {}...'.format(self.port))
+        print('Digite "parar" para encerrar o servidor.\n')
 
-        # Configura o tratamento de sinal para permitir encerramento limpo
-        signal.signal(signal.SIGINT, self.shutdown)
-        signal.signal(signal.SIGTERM, self.shutdown)
+        # Iniciar uma thread para aceitar o comando de parada
+        stop_thread = threading.Thread(target=self.stop_server)
+        stop_thread.start()
 
         while self.server_running.is_set():
             try:
@@ -56,8 +61,6 @@ class TCPServer:
                 if not self.server_running.is_set():
                     break
                 print('Erro ao aceitar conexão: {}'.format(e))
-
-        self.server_socket.close()
 
     def handle_client(self, client_socket):
         """
@@ -81,8 +84,19 @@ class TCPServer:
             except Exception as e:
                 print('Erro: {}'.format(e))
                 break
-
         client_socket.close()
+
+    def stop_server(self):
+        """
+        Comentário
+        """
+        while self.server_running.is_set():
+            command = input()
+            if command.lower() == 'parar':
+                print('encerrando servidor...')
+                self.server_running.clear()
+                self.server_socket.close()
+                break
 
     @staticmethod
     def validate_data(data):
@@ -109,19 +123,8 @@ class TCPServer:
         Parâmetros:
         - data (str): Dados validados a serem salvos.
         """
-        with open("relatorio/dados.txt", "a") as f:
+        with open("../relatorio/clientes.txt", "a") as f:
             f.write(data + '\n')  # Escreve os dados no arquivo, uma linha por dado
-
-    def shutdown(self, signum, frame):
-        """
-        Trata sinais de interrupção para parar o servidor de forma limpa.
-
-        Parâmetros:
-        - signum (int): Número do sinal.
-        - frame (frame): Frame atual do sinal.
-        """
-        print('Interrompendo o servidor...')
-        self.server_running.clear()
 
 
 # Inicializando o servidor

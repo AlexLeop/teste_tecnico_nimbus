@@ -16,7 +16,7 @@ def test_init_server(tcp_server):
     """
     Testa a inicialização do servidor com os valores padrão.
     """
-    assert tcp_server.host == '127.0.0.1'
+    assert tcp_server.host == 'localhost'
     assert tcp_server.port == 5784
     assert tcp_server.works == 5
     assert tcp_server.max_limit_message == 1024
@@ -56,7 +56,7 @@ def test_save_data(tcp_server):
         tcp_server.save_data("João,joao@example.com,1234567890,30")
 
         # Verifica se open foi chamado com os argumentos corretos
-        mock_open_file.assert_called_once_with("relatorio/dados.txt", "a")
+        mock_open_file.assert_called_once_with("../relatorio/clientes.txt", "a")
 
         # Verifica se o método write foi chamado com os dados corretos
         mock_file.write.assert_called_once_with("João,joao@example.com,1234567890,30\n")
